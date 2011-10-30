@@ -1,5 +1,5 @@
 #pragma once
-
+#include <ntifs.h>
 /*++
 
 Module Name:

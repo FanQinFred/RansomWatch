@@ -72,7 +72,7 @@ Return Value
 		}
 
 		if (ReplySize == 0 || ReplySize <= sizeof(RWD_REPLY_IRPS)) {
-			Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
+			// Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
 			Sleep(100);
 			continue;
 		}
@@ -80,7 +80,7 @@ Return Value
 		PDRIVER_MESSAGE pMsgIrp = ReplyMsgs->data; // get first irp if any
 		numOps = ReplyMsgs->numOps();
 		if (numOps == 0 || pMsgIrp == nullptr) {
-			Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
+			// Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
 			Sleep(100);
 			continue;
 		}
@@ -88,7 +88,7 @@ Return Value
 		Globals::Instance->postLogMessage(String::Concat("<V> Received num ops: ", numOps, System::Environment::NewLine), VERBOSE_ONLY);
 		while (pMsgIrp != nullptr) 
 		{
-			hr = ProcessIrp(*pMsgIrp);
+			hr = ProcessIrp(*pMsgIrp);  //向msg.gid的record添加msg
 			if (hr != S_OK) {
 				Globals::Instance->postLogMessage(String::Concat("<V> Failed to handle irp msg", System::Environment::NewLine), VERBOSE_ONLY);
 			}
