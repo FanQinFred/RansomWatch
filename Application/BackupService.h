@@ -69,10 +69,10 @@ public: BOOLEAN SnapshotDirectory(String ^ dirPath) {
 		}
 		if (!isFileTrap) {
 			String^ upFileName = fi->FullName->Replace('\\', '/');
-			CloudBlockBlob^ blob = container->GetBlockBlobReference(upFileName);
+			// CloudBlockBlob^ blob = container->GetBlockBlobReference(upFileName);
 			//bool exist = blob->Exists(nullptr, nullptr);
-			blob->UploadFromFile(fi->FullName, nullptr, nullptr, nullptr); //upload file and wait for it
-			blob->CreateSnapshotAsync(nullptr, nullptr, nullptr, nullptr); // create snapshot and continue, dont wait
+			// blob->UploadFromFile(fi->FullName, nullptr, nullptr, nullptr); //upload file and wait for it
+			// blob->CreateSnapshotAsync(nullptr, nullptr, nullptr, nullptr); // create snapshot and continue, dont wait
 				
 				
 		}

@@ -8,7 +8,7 @@ std::uniform_int_distribution<WORD> uniMinSec(0, 59);
 std::uniform_int_distribution<WORD> uniMilli(0, 999);
 
 void TrapHandler::FillRandContent(HANDLE file, std::size_t size) {
-	BCryptGenRandom(nullptr, Buffer, size, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+	//BCryptGenRandom(nullptr, Buffer, size, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 	Buffer[size - 1] = 0;
 	WriteFile(file, Buffer, size, nullptr, nullptr);	
 }
