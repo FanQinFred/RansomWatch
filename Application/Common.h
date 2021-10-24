@@ -10,7 +10,7 @@
 #include "FileId.h"
 #include "Debug.h"
 
-#define NUM_THREADS 2
+#define NUM_THREADS 1
 
 LPCSTR IRP_TO_STRING(UCHAR irp);
 
