@@ -29,6 +29,8 @@ HRESULT AntiRansomWareApp::MyForm::initWorkThread() {
 			return hr;
 			// raise error
 			//goto threadsCleanup;
+		}else{
+			printf("Create thread: %d\n", i);
 		}
 	}
 	return hr;
@@ -143,7 +145,7 @@ HRESULT AntiRansomWareApp::MyForm::AddFilterDirectory(String ^ directory)
 	else if (directory == nullptr) {
 		return S_FALSE;
 	}
-	//DBOUT("Kernel com init successfully, setting app pid to driver" << std::endl);
+	DBOUT("Kernel com init successfully, setting app pid to driver" << std::endl);
 	COM_MESSAGE setDirMsg;
 	BOOLEAN retOp = FALSE;
 	DWORD retSize;

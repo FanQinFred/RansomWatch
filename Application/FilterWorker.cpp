@@ -19,6 +19,22 @@ Return Value
 
 	HRESULT indicating the status of thread exit.
 
+
+  此前我们可能曾经多次听说过IRP这个名词，那么它究竟是什么呢？
+      IRP的全名是I/O Request Package，即输入输出请求包，它是Windows内核中的一种
+	  非常重要的数据结构。上层应用程序与底层驱动程序通信时，应用程序会发出I/O请求，
+	  操作系统将相应的I/O请求转换成相应的IRP，不同的IRP会根据类型被分派到不同的派
+	  遣例程中进行处理。
+      IRP有两个基本的属性，即MajorFunction和MinorFunction，分别记录IRP的主类型和
+	  子类型。操作系统根据MajorFunction决定将IRP分发到哪个派遣例程，然后派遣例程根
+	  据MinorFunction进行细分处理。
+      IRP的概念类似于Windows应用程序中“消息”的概念。在Win32编程中，程序由“消息”驱
+	  动，不同的消息被分发到不同的处理函数中，否则由系统默认处理。
+      文件I/O的相关函数例如CreateFile、ReadFile、WriteFile、CloseHandle等分别会
+	  引发操作系统产生IRP_MJ_CREATE、IRP_MJ_READ、IRP_MJ_WRITE、IRP_MJ_CLOSE等
+	  不同的IRP，这些IRP会被传送到驱动程序的相应派遣例程中。 
+
+
 --*/
 {
 	HRESULT hr = 0;

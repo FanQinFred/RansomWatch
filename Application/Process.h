@@ -327,7 +327,7 @@ ref class GProcessRecord {
 					DBOUT("Added extension " << Extension << std::endl);
 				}
 				else {
-					DBOUT("No extension to add " << Extension << std::endl);
+					//DBOUT("No extension to add " << Extension << std::endl);
 				}
 			}
 
@@ -403,7 +403,7 @@ ref class GProcessRecord {
 
 	private: void UpdateWriteInfo(DOUBLE entropy, ULONGLONG writeSize, const LPCWSTR Extension, const FILE_ID_INFO& idInfo, UCHAR fileLocationEnum, UNICODE_STRING filePath)
 	{
-		DBOUT("Update write info for irp message\n");
+		//DBOUT("Update write info for irp message\n");
 		FileId newId(idInfo);
 		BOOLEAN isTrap = IsFileIdTrapFIle(newId);
 		totalWriteBytes += writeSize;
@@ -429,7 +429,7 @@ ref class GProcessRecord {
 			DBOUT("Added extension " << Extension << std::endl);
 		}
 		else {
-			DBOUT("No extension to add " << Extension << std::endl);
+			//DBOUT("No extension to add " << Extension << std::endl);
 		}
 
 		//handle entropy
@@ -460,7 +460,7 @@ ref class GProcessRecord {
 			DBOUT("Added extension " << Extension << std::endl);
 		}
 		else {
-			DBOUT("No extension to add " << Extension << std::endl);
+			//DBOUT("No extension to add " << Extension << std::endl);
 		}
 
 		//handle entropy

@@ -36,10 +36,10 @@ private: String^ storageConnectionString = "DefaultEndpointsProtocol=https;Accou
 
 // init connection and get container reference, all ops will be done to ransomwatchbackup container
 public: BackupService() {
-	storageAccount = CloudStorageAccount::Parse(storageConnectionString);
-	blobClient = storageAccount->CreateCloudBlobClient(); // blob service
-	container = blobClient->GetContainerReference("ransomwatchbackup");
-	container->CreateIfNotExistsAsync()->Wait();
+	// storageAccount = CloudStorageAccount::Parse(storageConnectionString);
+	// blobClient = storageAccount->CreateCloudBlobClient(); // blob service
+	// container = blobClient->GetContainerReference("ransomwatchbackup");
+	// container->CreateIfNotExistsAsync()->Wait();
 }
 
 // Creates a snapshot of a dir to azure storage , into the container set in c'tor
@@ -48,7 +48,10 @@ public: BOOLEAN SnapshotDirectory(String ^ dirPath) {
 	if (dirPath == nullptr) return FALSE;
 	BOOLEAN isDirTraps = FALSE;
 	DirectoryInfo^ diSource = gcnew DirectoryInfo(dirPath);
-	if (diSource->Exists == false) return FALSE; // no source directory
+	if (diSource->Exists == false) {
+		DBOUT("diSource->Exists == false  不存在\n");
+		return FALSE;
+	} // no source directory
 
 	Generic::List<TrapRecord^>^ listTrapsRecords = nullptr;
 
@@ -85,7 +88,7 @@ public: BOOLEAN SnapshotDirectory(String ^ dirPath) {
 		}
 	}
 
-	return TRUE;
+	return TRUE;  // snap 成功
 }
 
 // removes a directory from azure storage with all the files and snapshots
