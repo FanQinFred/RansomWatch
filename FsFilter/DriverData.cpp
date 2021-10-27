@@ -214,7 +214,7 @@ ULONGLONG DriverData::GetProcessGid(ULONG ProcessId, PBOOLEAN found) {
 	ret = (ULONGLONG)PidToGids.get(ProcessId);
 	if (ret)* found = TRUE;
 	KeReleaseSpinLock(&GIDSystemLock, irql);
-	//DbgPrint("Gid: %d %d\n", ret, *found);
+	// DbgPrint("Gid: %d %d\n", ret, *found);
 	return ret;
 }
 
@@ -510,7 +510,7 @@ BOOLEAN DriverData::IsContainingDirectory(CONST PUNICODE_STRING path) {
 	if (path == NULL || path->Buffer == NULL) return FALSE;
 	BOOLEAN ret = FALSE;
 	KIRQL irql = KeGetCurrentIrql();
-	//DbgPrint("Looking for path: %ls in lookup dirs", path);
+	// DbgPrint("Looking for path: %ls in lookup dirs", path);
 	KeAcquireSpinLock(&directoriesSpinLock, &irql);
 	if (directoryRootsSize != 0) {
 		PLIST_ENTRY pEntry = rootDirectories.Flink;
