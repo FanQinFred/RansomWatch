@@ -282,7 +282,7 @@ BOOLEAN DriverData::AddIrpMessage(PIRP_ENTRY newEntry)
 
 	KIRQL irql = KeGetCurrentIrql();
 	KeAcquireSpinLock(&irpOpsLock, &irql);
-	if (irpOpsSize < MAX_OPS_SAVE) {
+	if (irpOpsSize < MAX_OPS_SAVE-100) {
 		irpOpsSize++;
 		InsertTailList(&irpOps, &newEntry->entry);
 	}
