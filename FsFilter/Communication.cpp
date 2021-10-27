@@ -93,14 +93,14 @@ RWFConnect(
 	//  the filter.
 	//
 
-//
-//设置用户进程和端口。在生产过滤器中，它可能
-//需要将对这些字段的访问与端口同步
-//一生。例如，过滤器管理器将同步
-//FltCloseClientPort与FltSendMessage读取端口
-//句柄，同步对UserProcess的访问将取决于
-//过滤器。
-//
+	//
+	//设置用户进程和端口。在生产过滤器中，它可能
+	//需要将对这些字段的访问与端口同步
+	//一生。例如，过滤器管理器将同步
+	//FltCloseClientPort与FltSendMessage读取端口
+	//句柄，同步对UserProcess的访问将取决于
+	//过滤器。
+	//
 
 	commHandle->ClientPort = ClientPort;
 	DbgPrint("!!! user connected, port=0x%p\n", ClientPort);
@@ -138,159 +138,165 @@ RWFNewMessage(
 	IN ULONG OutputBufferLength,
 	OUT PULONG ReturnOutputBufferLength)
 {
-	// DbgPrint("FsFilter::RWFNewMessage\n");
-	UNREFERENCED_PARAMETER(PortCookie);
-	UNREFERENCED_PARAMETER(InputBufferLength);
-
-	*ReturnOutputBufferLength = 0;
-
-	COM_MESSAGE *message = static_cast<COM_MESSAGE *>(InputBuffer);
-	if (message == NULL)
-		return STATUS_INTERNAL_ERROR; //failed message type
-
-	if (message->type == MESSAGE_ADD_SCAN_DIRECTORY)
+	try
 	{
-		DbgPrint("Recived add directory message\n");
-		PDIRECTORY_ENTRY newEntry = new DIRECTORY_ENTRY();
-		if (newEntry == NULL)
-		{
-			return STATUS_INSUFFICIENT_RESOURCES;
-		}
-		NTSTATUS hr = CopyWString(newEntry->path, message->path, MAX_FILE_NAME_LENGTH);
-		if (!NT_SUCCESS(hr))
-		{
-			delete newEntry;
-			return STATUS_INTERNAL_ERROR;
-		}
-		*ReturnOutputBufferLength = 1;
-		if (driverData->AddDirectoryEntry(newEntry))
-		{
-			*((PBOOLEAN)OutputBuffer) = TRUE;
-			DbgPrint("Added scan directory successfully\n");
-			return STATUS_SUCCESS;
-		}
-		else
-		{
-			delete newEntry;
-			*((PBOOLEAN)OutputBuffer) = FALSE;
-			DbgPrint("Failed to addscan directory\n");
-			return STATUS_SUCCESS;
-		}
-	}
-	else if (message->type == MESSAGE_REM_SCAN_DIRECTORY)
-	{
-		PDIRECTORY_ENTRY ptr = driverData->RemDirectoryEntry(message->path);
-		*ReturnOutputBufferLength = 1;
-		if (ptr == NULL)
-		{
-			*((PBOOLEAN)OutputBuffer) = FALSE;
-			DbgPrint("Failed to remove directory\n");
-			return STATUS_SUCCESS;
-		}
-		else
-		{
-			delete ptr;
-		}
-		*((PBOOLEAN)OutputBuffer) = TRUE;
-		DbgPrint("Removed scan directory successfully\n");
-		return STATUS_SUCCESS;
-	}
-	else if (message->type == MESSAGE_GET_OPS)
-	{
-		if (OutputBuffer == NULL || OutputBufferLength != MAX_COMM_BUFFER_SIZE)
-		{
-			return STATUS_INVALID_PARAMETER;
-		}
-		driverData->DriverGetIrps(OutputBuffer, OutputBufferLength, ReturnOutputBufferLength);
-		return STATUS_SUCCESS;
-	}
-	else if (message->type == MESSAGE_SET_PID)
-	{
-		if (message->pid != 0)
-		{
-			driverData->setPID(message->pid);
-			driverData->setSystemRootPath(message->path);
-			// DbgPrint("driverData->setSystemRootPath(message->path)\n");
-			commHandle->CommClosed = FALSE;
-			// DbgPrint("commHandle->CommClosed = FALSE;\n");
-			return STATUS_SUCCESS;
-		}
-		return STATUS_INVALID_PARAMETER;
-	}
-	// FIXME: the kill code to gid
-	else if (message->type == MESSAGE_KILL_GID)
-	{
-		if (OutputBuffer == NULL || OutputBufferLength != sizeof(LONG))
-		{
-			return STATUS_INVALID_PARAMETER;
-		}
-		*ReturnOutputBufferLength = sizeof(LONG);
-		NTSTATUS status = STATUS_SUCCESS;
-		HANDLE processHandle;
-		ULONGLONG GID = message->gid;
-		BOOLEAN isGidExist = FALSE;
-		ULONGLONG gidSize = driverData->GetGidSize(GID, &isGidExist);
-		if (gidSize == 0 || isGidExist == FALSE)
-		{
-			DbgPrint("!!! FS : Gid already ended or no such gid %d\n", GID);
-			*((PLONG)OutputBuffer) = STATUS_NO_SUCH_GROUP; // fail to kill process
-			return STATUS_SUCCESS;
-		}
-		// there is gid with processes
-		PULONG Buffer = (PULONG)ExAllocatePoolWithTag(NonPagedPool, sizeof(ULONG) * gidSize, 'RW');
-		if (Buffer == nullptr)
-		{
-			DbgPrint("!!! FS : memory allocation error on non paged pool\n");
-			*((PLONG)OutputBuffer) = STATUS_MEMORY_NOT_ALLOCATED; // fail to kill process
-			return STATUS_SUCCESS;
-		}
-		ULONGLONG pidsReturned = 0;
-		isGidExist = driverData->GetGidPids(GID, Buffer, gidSize, &pidsReturned);
-		if (isGidExist)
-		{ // got all irps and correct size
-			for (int i = 0; i < gidSize; i++)
-			{ // kill each process
-				CLIENT_ID clientId;
-				clientId.UniqueProcess = (HANDLE)Buffer[i];
-				clientId.UniqueThread = 0;
+		// DbgPrint("FsFilter::RWFNewMessage\n");
+		UNREFERENCED_PARAMETER(PortCookie);
+		UNREFERENCED_PARAMETER(InputBufferLength);
 
-				OBJECT_ATTRIBUTES objAttribs;
-				NTSTATUS exitStatus = STATUS_FAIL_CHECK;
+		*ReturnOutputBufferLength = 0;
 
-				DbgPrint("!!! FS : Attempt to terminate pid: %d from gid: %d\n", Buffer[i], GID);
+		COM_MESSAGE *message = static_cast<COM_MESSAGE *>(InputBuffer);
+		if (message == NULL)
+			return STATUS_INTERNAL_ERROR; //failed message type
 
-				InitializeObjectAttributes(&objAttribs,
-										   NULL,
-										   OBJ_KERNEL_HANDLE,
-										   NULL,
-										   NULL);
-
-				status = ZwOpenProcess(&processHandle,
-									   PROCESS_ALL_ACCESS,
-									   &objAttribs,
-									   &clientId);
-
-				if (!NT_SUCCESS(status))
-				{
-					*((PLONG)OutputBuffer) = STATUS_FAIL_CHECK; // fail
-					DbgPrint("!!! FS : Failed to open process %d, reason: %d\n", Buffer[i], status);
-					continue; // try to kill others
-				}
-				status = ZwTerminateProcess(processHandle, exitStatus);
-				if (!NT_SUCCESS(status))
-				{
-					*((PLONG)OutputBuffer) = STATUS_FAIL_CHECK; // fail
-					DbgPrint("!!! FS : Failed to kill process %d, reason: %d\n", Buffer[i], status);
-					status = NtClose(processHandle);
-					continue; // try to kill others
-				}
-				NtClose(processHandle);
-
-				DbgPrint("!!! FS : Termination of pid: %d from gid: %d succeeded\n", Buffer[i], GID);
+		if (message->type == MESSAGE_ADD_SCAN_DIRECTORY)
+		{
+			DbgPrint("Recived add directory message\n");
+			PDIRECTORY_ENTRY newEntry = new DIRECTORY_ENTRY();
+			if (newEntry == NULL)
+			{
+				return STATUS_INSUFFICIENT_RESOURCES;
+			}
+			NTSTATUS hr = CopyWString(newEntry->path, message->path, MAX_FILE_NAME_LENGTH);
+			if (!NT_SUCCESS(hr))
+			{
+				delete newEntry;
+				return STATUS_INTERNAL_ERROR;
+			}
+			*ReturnOutputBufferLength = 1;
+			if (driverData->AddDirectoryEntry(newEntry))
+			{
+				*((PBOOLEAN)OutputBuffer) = TRUE;
+				DbgPrint("Added scan directory successfully\n");
+				return STATUS_SUCCESS;
+			}
+			else
+			{
+				delete newEntry;
+				*((PBOOLEAN)OutputBuffer) = FALSE;
+				DbgPrint("Failed to addscan directory\n");
+				return STATUS_SUCCESS;
 			}
 		}
-		ExFreePoolWithTag(Buffer, 'RW');
-		return STATUS_SUCCESS;
+		else if (message->type == MESSAGE_REM_SCAN_DIRECTORY)
+		{
+			PDIRECTORY_ENTRY ptr = driverData->RemDirectoryEntry(message->path);
+			*ReturnOutputBufferLength = 1;
+			if (ptr == NULL)
+			{
+				*((PBOOLEAN)OutputBuffer) = FALSE;
+				DbgPrint("Failed to remove directory\n");
+				return STATUS_SUCCESS;
+			}
+			else
+			{
+				delete ptr;
+			}
+			*((PBOOLEAN)OutputBuffer) = TRUE;
+			DbgPrint("Removed scan directory successfully\n");
+			return STATUS_SUCCESS;
+		}
+		else if (message->type == MESSAGE_GET_OPS)
+		{
+			if (OutputBuffer == NULL || OutputBufferLength != MAX_COMM_BUFFER_SIZE)
+			{
+				return STATUS_INVALID_PARAMETER;
+			}
+			driverData->DriverGetIrps(OutputBuffer, OutputBufferLength, ReturnOutputBufferLength);
+			return STATUS_SUCCESS;
+		}
+		else if (message->type == MESSAGE_SET_PID)
+		{
+			if (message->pid != 0)
+			{
+				driverData->setPID(message->pid);
+				driverData->setSystemRootPath(message->path);
+				// DbgPrint("driverData->setSystemRootPath(message->path)\n");
+				commHandle->CommClosed = FALSE;
+				// DbgPrint("commHandle->CommClosed = FALSE;\n");
+				return STATUS_SUCCESS;
+			}
+			return STATUS_INVALID_PARAMETER;
+		}
+		// FIXME: the kill code to gid
+		else if (message->type == MESSAGE_KILL_GID)
+		{
+			if (OutputBuffer == NULL || OutputBufferLength != sizeof(LONG))
+			{
+				return STATUS_INVALID_PARAMETER;
+			}
+			*ReturnOutputBufferLength = sizeof(LONG);
+			NTSTATUS status = STATUS_SUCCESS;
+			HANDLE processHandle;
+			ULONGLONG GID = message->gid;
+			BOOLEAN isGidExist = FALSE;
+			ULONGLONG gidSize = driverData->GetGidSize(GID, &isGidExist);
+			if (gidSize == 0 || isGidExist == FALSE)
+			{
+				DbgPrint("!!! FS : Gid already ended or no such gid %d\n", GID);
+				*((PLONG)OutputBuffer) = STATUS_NO_SUCH_GROUP; // fail to kill process
+				return STATUS_SUCCESS;
+			}
+			// there is gid with processes
+			PULONG Buffer = (PULONG)ExAllocatePoolWithTag(NonPagedPool, sizeof(ULONG) * gidSize, 'RW');
+			if (Buffer == nullptr)
+			{
+				DbgPrint("!!! FS : memory allocation error on non paged pool\n");
+				*((PLONG)OutputBuffer) = STATUS_MEMORY_NOT_ALLOCATED; // fail to kill process
+				return STATUS_SUCCESS;
+			}
+			ULONGLONG pidsReturned = 0;
+			isGidExist = driverData->GetGidPids(GID, Buffer, gidSize, &pidsReturned);
+			if (isGidExist)
+			{ // got all irps and correct size
+				for (int i = 0; i < gidSize; i++)
+				{ // kill each process
+					CLIENT_ID clientId;
+					clientId.UniqueProcess = (HANDLE)Buffer[i];
+					clientId.UniqueThread = 0;
+
+					OBJECT_ATTRIBUTES objAttribs;
+					NTSTATUS exitStatus = STATUS_FAIL_CHECK;
+
+					DbgPrint("!!! FS : Attempt to terminate pid: %d from gid: %d\n", Buffer[i], GID);
+
+					InitializeObjectAttributes(&objAttribs,
+											   NULL,
+											   OBJ_KERNEL_HANDLE,
+											   NULL,
+											   NULL);
+
+					status = ZwOpenProcess(&processHandle,
+										   PROCESS_ALL_ACCESS,
+										   &objAttribs,
+										   &clientId);
+
+					if (!NT_SUCCESS(status))
+					{
+						*((PLONG)OutputBuffer) = STATUS_FAIL_CHECK; // fail
+						DbgPrint("!!! FS : Failed to open process %d, reason: %d\n", Buffer[i], status);
+						continue; // try to kill others
+					}
+					status = ZwTerminateProcess(processHandle, exitStatus);
+					if (!NT_SUCCESS(status))
+					{
+						*((PLONG)OutputBuffer) = STATUS_FAIL_CHECK; // fail
+						DbgPrint("!!! FS : Failed to kill process %d, reason: %d\n", Buffer[i], status);
+						status = NtClose(processHandle);
+						continue; // try to kill others
+					}
+					NtClose(processHandle);
+
+					DbgPrint("!!! FS : Termination of pid: %d from gid: %d succeeded\n", Buffer[i], GID);
+				}
+			}
+			ExFreePoolWithTag(Buffer, 'RW');
+			return STATUS_SUCCESS;
+		}
+	}
+	catch (Exception ^ e)
+	{
 	}
 
 	return STATUS_INTERNAL_ERROR;
