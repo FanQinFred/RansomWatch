@@ -199,7 +199,7 @@ RWFNewMessage(
 		}
 		else if (message->type == MESSAGE_GET_OPS)
 		{
-			if (OutputBuffer == NULL || OutputBufferLength != MAX_COMM_BUFFER_SIZE)
+			if (OutputBuffer == NULL || OutputBufferLength != MAX_COMM_BUFFER_SIZE || OutputBufferLength<=0 )
 			{
 				return STATUS_INVALID_PARAMETER;
 			}
