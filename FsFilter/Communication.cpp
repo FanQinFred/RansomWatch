@@ -138,8 +138,7 @@ RWFNewMessage(
 	IN ULONG OutputBufferLength,
 	OUT PULONG ReturnOutputBufferLength)
 {
-	try
-	{
+
 		// DbgPrint("FsFilter::RWFNewMessage\n");
 		UNREFERENCED_PARAMETER(PortCookie);
 		UNREFERENCED_PARAMETER(InputBufferLength);
@@ -294,10 +293,7 @@ RWFNewMessage(
 			ExFreePoolWithTag(Buffer, 'RW');
 			return STATUS_SUCCESS;
 		}
-	}
-	catch (...)
-	{
-	}
+
 
 	return STATUS_INTERNAL_ERROR;
 }
