@@ -295,7 +295,7 @@ RWFNewMessage(
 			return STATUS_SUCCESS;
 		}
 	}
-	catch (Exception ^ e)
+	catch (...)
 	{
 	}
 
