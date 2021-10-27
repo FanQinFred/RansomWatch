@@ -38,6 +38,8 @@ DriverData* driverData;
 
 // call assumes protected code high irql
 BOOLEAN DriverData::RemoveProcessRecordAux(ULONG ProcessId, ULONGLONG gid) {
+	
+	DbgPrint("DriverData::RemoveProcessRecordAux\n");
 	BOOLEAN ret = FALSE;
 	PGID_ENTRY gidRecord = (PGID_ENTRY)GidToPids.get(gid);
 	if (gidRecord == nullptr) { // shouldnt happen

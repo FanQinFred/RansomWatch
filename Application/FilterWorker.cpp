@@ -52,7 +52,7 @@ Return Value
 	
 	// FIXME
 	while (!Globals::Instance->getCommCloseStat()) { // while communication open
-		Sleep(1000);
+
 		std::set<ULONGLONG> gidsCheck;
 		DWORD ReplySize;
 		ULONGLONG numOps = 0;

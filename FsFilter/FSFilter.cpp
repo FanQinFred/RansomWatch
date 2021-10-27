@@ -140,13 +140,13 @@ Return Value:
 {
 	UNREFERENCED_PARAMETER(RegistryPath);
 	NTSTATUS status;
-	DbgPrint("loaded scanner successfully11");
+	DbgPrint("loaded scanner successfully11\n");
 	//
 	//  Default to NonPagedPoolNx for non paged pool allocations where supported.
 	//
-	DbgPrint("loaded scanner successfully22");
+	DbgPrint("loaded scanner successfully22\n");
 	ExInitializeDriverRuntime(DrvRtPoolNxOptIn);
-	DbgPrint("loaded scanner successfully33");
+	DbgPrint("loaded scanner successfully33\n");
 	//
 	//  Register with filter manager.
 	//
@@ -156,7 +156,7 @@ Return Value:
 	{
 		return STATUS_MEMORY_NOT_ALLOCATED;
 	}
-	DbgPrint("loaded scanner successfully44");
+	DbgPrint("loaded scanner successfully44\n");
 
 	PFLT_FILTER *FilterAdd = driverData->getFilterAdd();
 
@@ -164,22 +164,22 @@ Return Value:
 							   &FilterRegistration, //这是一个重要的数据结构，包含着我们过滤操作的回调函数
 							   FilterAdd);
 
-	DbgPrint("loaded scanner successfully55");
+	DbgPrint("loaded scanner successfully55v\n");
 	if (!NT_SUCCESS(status))
 	{
 		delete driverData;
 		return status;
 	}
-	DbgPrint("loaded scanner successfully66");
+	DbgPrint("loaded scanner successfully66\n");
 	commHandle = new CommHandler(driverData->getFilter());
 	if (commHandle == NULL)
 	{
 		delete driverData;
 		return STATUS_MEMORY_NOT_ALLOCATED;
 	}
-	DbgPrint("loaded scanner successfully77");
+	DbgPrint("loaded scanner successfully77\n");
 	status = InitCommData();
-	DbgPrint("loaded scanner successfully88");
+	DbgPrint("loaded scanner successfully88\n");
 	if (!NT_SUCCESS(status))
 	{
 		FltUnregisterFilter(driverData->getFilter());
@@ -190,10 +190,10 @@ Return Value:
 	//
 	//  Start filtering I/O.
 	//
-	DbgPrint("loaded scanner successfully99");
+	DbgPrint("loaded scanner successfully99\n");
 	//依据注册成功的句柄开启过滤
 	status = FltStartFiltering(driverData->getFilter());
-	DbgPrint("loaded scanner successfullyaa");
+	DbgPrint("loaded scanner successfullyaa\n");
 	if (!NT_SUCCESS(status))
 	{
 
@@ -203,13 +203,13 @@ Return Value:
 		delete commHandle;
 		return status;
 	}
-	DbgPrint("loaded scanner successfullybb");
+	DbgPrint("loaded scanner successfullybb\n");
 	driverData->setFilterStart();
-	DbgPrint("loaded scanner successfullycc");
+	DbgPrint("loaded scanner successfullycc\n");
 	// new code
 	// FIXME: check status and release in unload
 	PsSetCreateProcessNotifyRoutine(AddRemProcessRoutine, FALSE);
-	DbgPrint("loaded scanner successfullydd");
+	DbgPrint("loaded scanner successfullydd\n");
 	return STATUS_SUCCESS;
 }
 
@@ -1303,9 +1303,7 @@ VOID AddRemProcessRoutine(
 			return;
 		}
 		// options to reach: process is not safe (parent safe or not), process safe parent is not, both safe but before parent there was unsafe process
-		// DbgPrint("1driverData->RecordNewProcess(procName, (ULONG)(ULONG_PTR)ProcessId, (ULONG)(ULONG_PTR)ParentId)\n");
 		DbgPrint("!!! FSFilter: Open Process recording, is parent safe: %d, is process safe: %d\n", startsWith(procName, driverData->GetSystemRootPath()), startsWith(parentName, driverData->GetSystemRootPath()));
-		// DbgPrint("2driverData->RecordNewProcess(procName, (ULONG)(ULONG_PTR)ProcessId, (ULONG)(ULONG_PTR)ParentId)\n");
 		driverData->RecordNewProcess(procName, (ULONG)(ULONG_PTR)ProcessId, (ULONG)(ULONG_PTR)ParentId);
 
 		delete parentName;
