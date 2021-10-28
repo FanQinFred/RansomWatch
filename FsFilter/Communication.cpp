@@ -138,8 +138,9 @@ RWFNewMessage(
 	IN ULONG OutputBufferLength,
 	OUT PULONG ReturnOutputBufferLength)
 {
-
-		// DbgPrint("FsFilter::RWFNewMessage\n");
+	__try
+	{
+		//return STATUS_INTERNAL_ERROR;
 		UNREFERENCED_PARAMETER(PortCookie);
 		UNREFERENCED_PARAMETER(InputBufferLength);
 
@@ -198,7 +199,8 @@ RWFNewMessage(
 		}
 		else if (message->type == MESSAGE_GET_OPS)
 		{
-			if (OutputBuffer == NULL || OutputBufferLength != MAX_COMM_BUFFER_SIZE || OutputBufferLength<=0 )
+			DbgPrint("message->type == MESSAGE_GET_OPS\n");
+			if (OutputBuffer == NULL || OutputBufferLength != MAX_COMM_BUFFER_SIZE || OutputBufferLength <= 0)
 			{
 				return STATUS_INVALID_PARAMETER;
 			}
@@ -207,6 +209,7 @@ RWFNewMessage(
 		}
 		else if (message->type == MESSAGE_SET_PID)
 		{
+			DbgPrint("message->type == MESSAGE_SET_PID\n");
 			if (message->pid != 0)
 			{
 				driverData->setPID(message->pid);
@@ -221,6 +224,7 @@ RWFNewMessage(
 		// FIXME: the kill code to gid
 		else if (message->type == MESSAGE_KILL_GID)
 		{
+			DbgPrint("message->type == MESSAGE_KILL_GID\n");
 			if (OutputBuffer == NULL || OutputBufferLength != sizeof(LONG))
 			{
 				return STATUS_INVALID_PARAMETER;
@@ -293,7 +297,13 @@ RWFNewMessage(
 			ExFreePoolWithTag(Buffer, 'RW');
 			return STATUS_SUCCESS;
 		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
 
+		DbgPrint("!!! FSFilter: EXCEPTION_EXECUTE_HANDLER----STATUS_INTERNAL_ERROR\n");
+		return STATUS_INTERNAL_ERROR;
+	}
 
 	return STATUS_INTERNAL_ERROR;
 }
