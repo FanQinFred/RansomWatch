@@ -51,64 +51,64 @@ Return Value
 	GetIrpMsg.gid = 0;
 	
 	// FIXME
-	// while (!Globals::Instance->getCommCloseStat()) { // while communication open
+	while (!Globals::Instance->getCommCloseStat()) { // while communication open
 
-	// 	std::set<ULONGLONG> gidsCheck;
-	// 	DWORD ReplySize;
-	// 	ULONGLONG numOps = 0;
-	// 	hr = FilterSendMessage(Port, &GetIrpMsg, sizeof(COM_MESSAGE), Buffer, BufferSize, &ReplySize);
-	// 	if (FAILED(hr)) {
-	// 		Globals::Instance->postLogMessage(String::Concat("<V> Failed irp request, stopping", System::Environment::NewLine), PRIORITY_PRINT);
-	// 		Globals::Instance->setCommCloseStat(TRUE);
-	// 		break;
-	// 	}
+		std::set<ULONGLONG> gidsCheck;
+		DWORD ReplySize;
+		ULONGLONG numOps = 0;
+		hr = FilterSendMessage(Port, &GetIrpMsg, sizeof(COM_MESSAGE), Buffer, BufferSize, &ReplySize);
+		if (FAILED(hr)) {
+			Globals::Instance->postLogMessage(String::Concat("<V> Failed irp request, stopping", System::Environment::NewLine), PRIORITY_PRINT);
+			Globals::Instance->setCommCloseStat(TRUE);
+			break;
+		}
 
-	// 	if (ReplySize == 0 || ReplySize <= sizeof(RWD_REPLY_IRPS)) {
-	// 		Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
-	// 		Sleep(100);
-	// 		continue;
-	// 	}
-	// 	PRWD_REPLY_IRPS ReplyMsgs = (PRWD_REPLY_IRPS)Buffer;
-	// 	PDRIVER_MESSAGE pMsgIrp = ReplyMsgs->data; // get first irp if any
-	// 	numOps = ReplyMsgs->numOps();
-	// 	if (numOps == 0 || pMsgIrp == nullptr) {
-	// 		Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
-	// 		Sleep(100);
-	// 		continue;
-	// 	}
+		if (ReplySize == 0 || ReplySize <= sizeof(RWD_REPLY_IRPS)) {
+			Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
+			Sleep(100);
+			continue;
+		}
+		PRWD_REPLY_IRPS ReplyMsgs = (PRWD_REPLY_IRPS)Buffer;
+		PDRIVER_MESSAGE pMsgIrp = ReplyMsgs->data; // get first irp if any
+		numOps = ReplyMsgs->numOps();
+		if (numOps == 0 || pMsgIrp == nullptr) {
+			Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
+			Sleep(100);
+			continue;
+		}
 
-	// 	Globals::Instance->postLogMessage(String::Concat("<V> Received num ops: ", numOps, System::Environment::NewLine), VERBOSE_ONLY);
-	// 	while (pMsgIrp != nullptr) 
-	// 	{
-	// 		hr = ProcessIrp(*pMsgIrp);
-	// 		if (hr != S_OK) {
-	// 			Globals::Instance->postLogMessage(String::Concat("<V> Failed to handle irp msg", System::Environment::NewLine), VERBOSE_ONLY);
-	// 		}
-	// 		gidsCheck.insert(pMsgIrp->Gid);
-	// 		if (Globals::Instance->Verbose()) {
-	// 			if (pMsgIrp->filePath.Length) {
-	// 				std::wstring fileNameStr(pMsgIrp->filePath.Buffer, pMsgIrp->filePath.Length / 2);
-	// 				Globals::Instance->postLogMessage(String::Concat("<V> Received irp on file: ", gcnew String(fileNameStr.c_str()), System::Environment::NewLine), VERBOSE_ONLY);
-	// 			}
-	// 			else {
-	// 				Globals::Instance->postLogMessage(String::Concat("<V> Received irp with file len 0", System::Environment::NewLine), VERBOSE_ONLY);
-	// 			}
-	// 		}
-	// 		pMsgIrp = (PDRIVER_MESSAGE)pMsgIrp->next;
-	// 	}
+		Globals::Instance->postLogMessage(String::Concat("<V> Received num ops: ", numOps, System::Environment::NewLine), VERBOSE_ONLY);
+		while (pMsgIrp != nullptr) 
+		{
+			hr = ProcessIrp(*pMsgIrp);
+			if (hr != S_OK) {
+				Globals::Instance->postLogMessage(String::Concat("<V> Failed to handle irp msg", System::Environment::NewLine), VERBOSE_ONLY);
+			}
+			gidsCheck.insert(pMsgIrp->Gid);
+			if (Globals::Instance->Verbose()) {
+				if (pMsgIrp->filePath.Length) {
+					std::wstring fileNameStr(pMsgIrp->filePath.Buffer, pMsgIrp->filePath.Length / 2);
+					Globals::Instance->postLogMessage(String::Concat("<V> Received irp on file: ", gcnew String(fileNameStr.c_str()), System::Environment::NewLine), VERBOSE_ONLY);
+				}
+				else {
+					Globals::Instance->postLogMessage(String::Concat("<V> Received irp with file len 0", System::Environment::NewLine), VERBOSE_ONLY);
+				}
+			}
+			pMsgIrp = (PDRIVER_MESSAGE)pMsgIrp->next;
+		}
 
-	// 	// log 
+		// log 
 
-	// 	TotalIrpCount += numOps;
-	// 	Globals::Instance->addIrpHandled(numOps);
+		TotalIrpCount += numOps;
+		Globals::Instance->addIrpHandled(numOps);
 
-	// 	// check Malicious, handle in that case
-	// 	for (ULONGLONG gid : gidsCheck) {
-	// 		CheckHandleMaliciousApplication(gid, Port);
-	// 	}
+		// check Malicious, handle in that case
+		for (ULONGLONG gid : gidsCheck) {
+			CheckHandleMaliciousApplication(gid, Port);
+		}
 
-	// 	Globals::Instance->postLogMessage(String::Concat("<V> ... Finished handling irp requests, requesting", System::Environment::NewLine), VERBOSE_ONLY);
-	// }
+		Globals::Instance->postLogMessage(String::Concat("<V> ... Finished handling irp requests, requesting", System::Environment::NewLine), VERBOSE_ONLY);
+	}
 	delete[] Buffer;
 	return hr;
 }
