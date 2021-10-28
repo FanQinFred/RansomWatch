@@ -65,11 +65,11 @@ BOOLEAN startsWith(PUNICODE_STRING String, PWCHAR Pattern) {
 	PWCHAR buffer = String->Buffer;
 	for (ULONG i = 0; i < wcslen(Pattern); i++) {
 		if (String->Length <= 2*i) {
-			DbgPrint("String ended before pattern, %d\n", i);
+			// DbgPrint("String ended before pattern, %d\n", i);
 			return FALSE;
 		}
 		if (RtlDowncaseUnicodeChar(Pattern[i]) != RtlDowncaseUnicodeChar(buffer[i])) {
-			DbgPrint("Chars not eq: %d, %d\n", RtlDowncaseUnicodeChar(Pattern[i]), RtlDowncaseUnicodeChar(buffer[i]));
+			// DbgPrint("Chars not eq: %d, %d\n", RtlDowncaseUnicodeChar(Pattern[i]), RtlDowncaseUnicodeChar(buffer[i]));
 			return FALSE;
 		}
 		// DbgPrint("Chars are eq: %d, %d\n", RtlDowncaseUnicodeChar(Pattern[i]), RtlDowncaseUnicodeChar(buffer[i]));

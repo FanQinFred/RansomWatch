@@ -1303,16 +1303,15 @@ VOID AddRemProcessRoutine(
 			return;
 		}
 		// options to reach: process is not safe (parent safe or not), process safe parent is not, both safe but before parent there was unsafe process
-		DbgPrint("!!! FSFilter: Open Process recording, is parent safe: %d, is process safe: %d\n", startsWith(procName, driverData->GetSystemRootPath()), startsWith(parentName, driverData->GetSystemRootPath()));
+		DbgPrint("!!! FSFilter: Open Process recording, is parent safe: %d, is process safe: %d\n\n", startsWith(procName, driverData->GetSystemRootPath()), startsWith(parentName, driverData->GetSystemRootPath()));
 		driverData->RecordNewProcess(procName, (ULONG)(ULONG_PTR)ProcessId, (ULONG)(ULONG_PTR)ParentId);
 
 		delete parentName;
 	}
 	else
 	{
-		DbgPrint("!!! FSFilter: Terminate Process, Process: %d pid\n", (ULONG)(ULONG_PTR)ProcessId);
+		DbgPrint("!!! FSFilter: Terminate Process, Process: %d pid\n\n", (ULONG)(ULONG_PTR)ProcessId);
 		driverData->RemoveProcess((ULONG)(ULONG_PTR)ProcessId);
-		DbgPrint("driverData->RemoveProcess((ULONG)(ULONG_PTR)ProcessId);\n");
 	}
 	return;
 }
