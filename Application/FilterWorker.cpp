@@ -34,79 +34,90 @@ Return Value
 
 --*/
 {
-	HRESULT hr = 0;
-	// HANDLE Port = Context->Port;
-	// ULONG IrpCount = 0;
-	// ULONGLONG TotalIrpCount = 0;
-	// /*create buffer*/
-	// CONST DWORD BufferSize = MAX_COMM_BUFFER_SIZE;
-	// PBYTE Buffer = new BYTE[BufferSize]; // prepare space for message header reply and 10 messages
-	// COM_MESSAGE GetIrpMsg;
-	// GetIrpMsg.type = MESSAGE_GET_OPS;
-	// GetIrpMsg.pid = GetCurrentProcessId();
-	// GetIrpMsg.path[0] = L'\0';
-	// GetIrpMsg.gid = 0;
 	
-	// // FIXME
-	// while (!Globals::Instance->getCommCloseStat()) { // while communication open
 
-	// 	std::set<ULONGLONG> gidsCheck;
-	// 	DWORD ReplySize;
-	// 	ULONGLONG numOps = 0;
-	// 	hr = FilterSendMessage(Port, &GetIrpMsg, sizeof(COM_MESSAGE), Buffer, BufferSize, &ReplySize);
-	// 	if (FAILED(hr)) {
-	// 		Globals::Instance->postLogMessage(String::Concat("<V> Failed irp request, stopping", System::Environment::NewLine), PRIORITY_PRINT);
-	// 		Globals::Instance->setCommCloseStat(TRUE);
-	// 		break;
-	// 	}
+	HRESULT hr = 0;
+	ULONG stkLimit = 1024*4;// 4K
+    if(!SetThreadStackGuarantee(&stkLimit)){
+		Globals::Instance->postLogMessage(String::Concat("SetThreadStackGuarantee failed", System::Environment::NewLine), VERBOSE_ONLY);
+		DBOUT("SetThreadStackGuarantee failed" << std::endl);
+        return hr;
+    }else{
+		Globals::Instance->postLogMessage(String::Concat("SetThreadStackGuarantee successfully", System::Environment::NewLine), VERBOSE_ONLY);
+		DBOUT("SetThreadStackGuarantee successfully" << std::endl);
+	}
+	HANDLE Port = Context->Port;
+	ULONG IrpCount = 0;
+	ULONGLONG TotalIrpCount = 0;
+	/*create buffer*/
+	CONST DWORD BufferSize = MAX_COMM_BUFFER_SIZE;
+	PBYTE Buffer = new BYTE[BufferSize]; // prepare space for message header reply and 10 messages
+	COM_MESSAGE GetIrpMsg;
+	GetIrpMsg.type = MESSAGE_GET_OPS;
+	GetIrpMsg.pid = GetCurrentProcessId();
+	GetIrpMsg.path[0] = L'\0';
+	GetIrpMsg.gid = 0;
+	
+	// FIXME
+	while (!Globals::Instance->getCommCloseStat()) { // while communication open
 
-	// 	if (ReplySize == 0 || ReplySize <= sizeof(RWD_REPLY_IRPS)) {
-	// 		Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
-	// 		Sleep(100);
-	// 		continue;
-	// 	}
-	// 	PRWD_REPLY_IRPS ReplyMsgs = (PRWD_REPLY_IRPS)Buffer;
-	// 	PDRIVER_MESSAGE pMsgIrp = ReplyMsgs->data; // get first irp if any
-	// 	numOps = ReplyMsgs->numOps();
-	// 	if (numOps == 0 || pMsgIrp == nullptr) {
-	// 		Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
-	// 		Sleep(100);
-	// 		continue;
-	// 	}
+		std::set<ULONGLONG> gidsCheck;
+		DWORD ReplySize;
+		ULONGLONG numOps = 0;
+		hr = FilterSendMessage(Port, &GetIrpMsg, sizeof(COM_MESSAGE), Buffer, BufferSize, &ReplySize);
+		if (FAILED(hr)) {
+			Globals::Instance->postLogMessage(String::Concat("<V> Failed irp request, stopping", System::Environment::NewLine), PRIORITY_PRINT);
+			Globals::Instance->setCommCloseStat(TRUE);
+			break;
+		}
 
-	// 	Globals::Instance->postLogMessage(String::Concat("<V> Received num ops: ", numOps, System::Environment::NewLine), VERBOSE_ONLY);
-	// 	while (pMsgIrp != nullptr) 
-	// 	{
-	// 		hr = ProcessIrp(*pMsgIrp);
-	// 		if (hr != S_OK) {
-	// 			Globals::Instance->postLogMessage(String::Concat("<V> Failed to handle irp msg", System::Environment::NewLine), VERBOSE_ONLY);
-	// 		}
-	// 		gidsCheck.insert(pMsgIrp->Gid);
-	// 		if (Globals::Instance->Verbose()) {
-	// 			if (pMsgIrp->filePath.Length) {
-	// 				std::wstring fileNameStr(pMsgIrp->filePath.Buffer, pMsgIrp->filePath.Length / 2);
-	// 				Globals::Instance->postLogMessage(String::Concat("<V> Received irp on file: ", gcnew String(fileNameStr.c_str()), System::Environment::NewLine), VERBOSE_ONLY);
-	// 			}
-	// 			else {
-	// 				Globals::Instance->postLogMessage(String::Concat("<V> Received irp with file len 0", System::Environment::NewLine), VERBOSE_ONLY);
-	// 			}
-	// 		}
-	// 		pMsgIrp = (PDRIVER_MESSAGE)pMsgIrp->next;
-	// 	}
+		if (ReplySize == 0 || ReplySize <= sizeof(RWD_REPLY_IRPS)) {
+			Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
+			Sleep(100);
+			continue;
+		}
+		PRWD_REPLY_IRPS ReplyMsgs = (PRWD_REPLY_IRPS)Buffer;
+		PDRIVER_MESSAGE pMsgIrp = ReplyMsgs->data; // get first irp if any
+		numOps = ReplyMsgs->numOps();
+		if (numOps == 0 || pMsgIrp == nullptr) {
+			Globals::Instance->postLogMessage(String::Concat("<V> No ops to report, waiting", System::Environment::NewLine), VERBOSE_ONLY);
+			Sleep(100);
+			continue;
+		}
 
-	// 	// log 
+		Globals::Instance->postLogMessage(String::Concat("<V> Received num ops: ", numOps, System::Environment::NewLine), VERBOSE_ONLY);
+		while (pMsgIrp != nullptr) 
+		{
+			hr = ProcessIrp(*pMsgIrp);
+			if (hr != S_OK) {
+				Globals::Instance->postLogMessage(String::Concat("<V> Failed to handle irp msg", System::Environment::NewLine), VERBOSE_ONLY);
+			}
+			gidsCheck.insert(pMsgIrp->Gid);
+			if (Globals::Instance->Verbose()) {
+				if (pMsgIrp->filePath.Length) {
+					std::wstring fileNameStr(pMsgIrp->filePath.Buffer, pMsgIrp->filePath.Length / 2);
+					Globals::Instance->postLogMessage(String::Concat("<V> Received irp on file: ", gcnew String(fileNameStr.c_str()), System::Environment::NewLine), VERBOSE_ONLY);
+				}
+				else {
+					Globals::Instance->postLogMessage(String::Concat("<V> Received irp with file len 0", System::Environment::NewLine), VERBOSE_ONLY);
+				}
+			}
+			pMsgIrp = (PDRIVER_MESSAGE)pMsgIrp->next;
+		}
 
-	// 	TotalIrpCount += numOps;
-	// 	Globals::Instance->addIrpHandled(numOps);
+		// log 
 
-	// 	// check Malicious, handle in that case
-	// 	for (ULONGLONG gid : gidsCheck) {
-	// 		CheckHandleMaliciousApplication(gid, Port);
-	// 	}
+		TotalIrpCount += numOps;
+		Globals::Instance->addIrpHandled(numOps);
 
-	// 	Globals::Instance->postLogMessage(String::Concat("<V> ... Finished handling irp requests, requesting", System::Environment::NewLine), VERBOSE_ONLY);
-	// }
-	// delete[] Buffer;
+		// check Malicious, handle in that case
+		for (ULONGLONG gid : gidsCheck) {
+			CheckHandleMaliciousApplication(gid, Port);
+		}
+
+		Globals::Instance->postLogMessage(String::Concat("<V> ... Finished handling irp requests, requesting", System::Environment::NewLine), VERBOSE_ONLY);
+	}
+	delete[] Buffer;
 	return hr;
 }
 

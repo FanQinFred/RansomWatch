@@ -14,7 +14,7 @@ HRESULT AntiRansomWareApp::MyForm::initWorkThread()
 	for (DWORD i = 0; i < numOfThreads; i++)
 	{
 		threads[i] = CreateThread(NULL,
-								  10000,
+								  0,
 								  (LPTHREAD_START_ROUTINE)FilterWorker,
 								  &context,
 								  0,
