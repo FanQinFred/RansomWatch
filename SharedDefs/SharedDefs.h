@@ -24,8 +24,8 @@ const PWSTR ComPortName = L"\\RWFilter";
 #define MAX_FILE_NAME_SIZE (MAX_FILE_NAME_LENGTH * sizeof(WCHAR)) // max length in bytes of files sizes and dir paths
 #define FILE_OBJECT_ID_SIZE 128
 #define FILE_OBJEC_MAX_EXTENSION_SIZE 20 
-#define MAX_COMM_BUFFER_SIZE 0x1000 // size of the buffer we allocate to recieve irp ops from the driver 
-#define MAX_OPS_SAVE 0x1000 // max ops to save, we limit this to prevent driver from filling the non paged memory and crashing the os
+#define MAX_COMM_BUFFER_SIZE 0x100000 // size of the buffer we allocate to recieve irp ops from the driver 
+#define MAX_OPS_SAVE 0x100000 // max ops to save, we limit this to prevent driver from filling the non paged memory and crashing the os
 
 // msgs types that the application may send to the driver
 enum COM_MESSAGE_TYPE {
