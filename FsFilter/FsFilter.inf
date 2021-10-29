@@ -96,5 +96,5 @@ DefaultInstance         = "FsFilter Instance"
 Instance1.Name          = "FsFilter Instance"
 ; TODO - Change the altitude value, see https://msdn.microsoft.com/en-us/windows/hardware/drivers/ifs/load-order-groups-and-altitudes-for-minifilter-drivers
 ; Instance1.Altitude       = "360000"
-Instance1.Altitude       = "329000"
+Instance1.Altitude       = "329998"
 Instance1.Flags         = 0x0              ; Allow all attachments
