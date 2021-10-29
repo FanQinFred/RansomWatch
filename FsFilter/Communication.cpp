@@ -207,16 +207,15 @@ RWFNewMessage(
 			driverData->DriverGetIrps(OutputBuffer, OutputBufferLength, ReturnOutputBufferLength);
 			return STATUS_SUCCESS;
 		}
-		else if (message->type == MESSAGE_SET_PID)
+		else 
+		if (message->type == MESSAGE_SET_PID)
 		{
 			DbgPrint("message->type == MESSAGE_SET_PID\n");
 			if (message->pid != 0)
 			{
 				driverData->setPID(message->pid);
 				driverData->setSystemRootPath(message->path);
-				// DbgPrint("driverData->setSystemRootPath(message->path)\n");
 				commHandle->CommClosed = FALSE;
-				// DbgPrint("commHandle->CommClosed = FALSE;\n");
 				return STATUS_SUCCESS;
 			}
 			return STATUS_INVALID_PARAMETER;
@@ -305,7 +304,9 @@ RWFNewMessage(
 		return STATUS_INTERNAL_ERROR;
 	}
 
-	return STATUS_INTERNAL_ERROR;
+	// return STATUS_INTERNAL_ERROR;
+
+	return STATUS_SUCCESS;
 }
 
 CommHandler *commHandle;

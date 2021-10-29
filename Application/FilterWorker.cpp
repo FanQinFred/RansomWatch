@@ -51,7 +51,7 @@ Return Value
 	ULONGLONG TotalIrpCount = 0;
 	/*create buffer*/
 	CONST DWORD BufferSize = MAX_COMM_BUFFER_SIZE;
-	PBYTE Buffer = new BYTE[BufferSize]; // prepare space for message header reply and 10 messages
+	PBYTE Buffer; // prepare space for message header reply and 10 messages
 	COM_MESSAGE GetIrpMsg;
 	GetIrpMsg.type = MESSAGE_GET_OPS;
 	GetIrpMsg.pid = GetCurrentProcessId();
@@ -60,7 +60,7 @@ Return Value
 	
 	// FIXME
 	while (!Globals::Instance->getCommCloseStat()) { // while communication open
-
+ 		Buffer = new BYTE[BufferSize];
 		std::set<ULONGLONG> gidsCheck;
 		DWORD ReplySize;
 		ULONGLONG numOps = 0;
@@ -116,6 +116,7 @@ Return Value
 		}
 
 		Globals::Instance->postLogMessage(String::Concat("<V> ... Finished handling irp requests, requesting", System::Environment::NewLine), VERBOSE_ONLY);
+		delete[] Buffer;
 	}
 	delete[] Buffer;
 	return hr;
@@ -255,7 +256,7 @@ VOID CheckHandleMaliciousApplication(ULONGLONG gid, HANDLE comPort) {
 				Globals::Instance->postLogMessage(String::Concat("<I> Created report file for ransomware: ", reportFile, System::Environment::NewLine), PRIORITY_PRINT);			
 				sw->Flush();
 				sw->WriteLine("Restore result:");
-				BackupService^ backService = Globals::Instance->backupService();
+				BackupService^ backService = nullptr;//Globals::Instance->backupService();
 				if (backService == nullptr) {
 					Globals::Instance->postLogMessage(String::Concat("<E> Failed to restore files, backupservice not init", System::Environment::NewLine), PRIORITY_PRINT);
 					sw->WriteLine("Failed to use backup service");

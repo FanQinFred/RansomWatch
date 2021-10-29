@@ -3,7 +3,7 @@
 
 constexpr DOUBLE M_LOG2E = 1.4426950408889634 ;
 
-constexpr ULONG MAX_BYTE_SIZE = 256;
+constexpr ULONG MAX_BYTE_SIZE = 2048;
 
 DOUBLE shannonEntropy(PUCHAR buffer, size_t size)
 {
