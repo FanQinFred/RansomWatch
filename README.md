@@ -19,18 +19,6 @@ The user-mode application is written in C++/CLI.
 <br/>
 *GID - Group Identifier. Not to be confused with Linux's GID, which is something completely different. It is the name of the unique identifier the driver assigns to a set of all PIDs (process identiders) that are related to one another by process creation. For example, if a process A creates a process B, A and B will share a common GID (the GID that was assigned to process A).
 
-
-## Examples
-
-<div align="center">
-  <a href="https://youtu.be/91QNTsN7H6Y"><img src="https://i.imgur.com/GEjv3tn.png" alt="Detecting WannaCry"></a>
-</div>
-
-<div align="center">
-  <a href="https://youtu.be/awjAM1B6XCc"><img src="https://i.imgur.com/v3KPW7W.png" alt="Detecting Jigsaw"></a>
-</div>
-
-
 ## Open issues
 
 1. Backup service is incomplete. Backup is done only once, when the user selects new folders to protect. A complete solution should at the very least support periodical backup.
